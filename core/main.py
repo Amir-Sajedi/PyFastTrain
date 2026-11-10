@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status, HTTPException
 import random as random
 
 app = FastAPI()
@@ -13,10 +13,13 @@ name_list = [
 
 # /names (GET(RETRIVE), POST(CREATE))
 @app .get("/names")
-def retrieve_names_list():
+def retrieve_names_list(q: str | None = None):
+    if q:
+        return [item for item in name_list if item["name"] == q]
+    # follow the oic rule (operation iteration condition)
     return name_list
 
-@app.post("/names")
+@app.post("/names", status_code =status.HTTP_201_CREATED )
 def create_name(name: str):
     name_obj = {"id":random.randint(6,100),"name":name }
     name_list.append(name_obj)
@@ -24,12 +27,32 @@ def create_name(name: str):
 
 
 # /names/:id (GET(RETRIVE), PUT/PATCH((UPDATE), DELETE))
-@app.get("/names/{name_id}")
+@app.get("/names/{name_id}", status_code=status.HTTP_200_OK)
 def retrieve_name_detail(name_id: int):
     for name in name_list:
         if name["id"] == name_id:
             return name
-    return {"detail": "object not found"}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="object not found") 
+
+@app.put("/names/{name_id}")
+def update_name_detail(name_id: int, name:str):
+    for item in name_list:
+            if item["id"] == name_id:
+                item["name"] = name
+                return {"name": name}
+            
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="object not found")     
+
+@app.delete("/names/{name_id}")
+def delete_name_detail(name_id: int):
+    for item in name_list:
+            if item["id"] == name_id:
+                name_list.remove(item)
+                return {"detail": "object has been removed successfully"}
+            
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="object not found")     
+
+
 
 
 
