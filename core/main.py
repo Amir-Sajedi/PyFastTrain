@@ -38,8 +38,8 @@ name_list = [
 
 
 # /names (GET(RETRIVE), POST(CREATE))
-@app .get("/names")
-def retrieve_names_list(q: str | None = Query(description="it will be searched with the title that you have already     provided",default=None, max_length= 50, response_model=List[PersonResponseSchema])): # the List() wont work here
+@app .get("/names", response_model=List[PersonResponseSchema])
+def retrieve_names_list(q: str | None = Query(description="it will be searched with the title that you have already     provided",default=None, max_length= 50)): # the List() wont work here
     if q:
         return [item for item in name_list if item["name"] == q]
     # follow the oic rule (operation iteration condition)
