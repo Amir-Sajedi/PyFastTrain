@@ -1,5 +1,6 @@
 from fastapi import FastAPI, status, HTTPException, Query, Path, Form, Body, File, UploadFile
 import random as random
+from dataclasses import dataclass
 from typing import List
 from fastapi import UploadFile
 from contextlib import asynccontextmanager
@@ -43,10 +44,23 @@ def retrieve_names_list(q: str | None = Query(description="it will be searched w
     # follow the oic rule (operation iteration condition)
     return name_list
 
-@app.post("/names", status_code =status.HTTP_201_CREATED )
-def create_name(name: str = Body(embed=True)):
-    name_obj = {"id":random.randint(6,100),"name":name }
+@dataclass
+class Student:
+    name: str
+    age: int
+@dataclass
+class StudetnResponse:
+    id: int
+    name: str
+
+
+
+@app.post("/names", status_code =status.HTTP_201_CREATED, response_model=StudetnResponse )
+def create_name(student : Student):
+    name_obj = {"id":random.randint(6,100),"name":student.name }
     name_list.append(name_obj)
+    response = StudetnResponse(random.randint(6,100),student.name)
+    print(student)
     return name_obj
 
 
